@@ -91,12 +91,35 @@ document.getElementById('open-letter-btn').addEventListener('click', (e) => {
     toggleLetter();
 });
 
-// ====== VINILO ======
+// ====== VINILO + SPOTIFY ======
+let spotifyController = null;
+const vinylLabel = document.getElementById('vinyl-label');
+const needle = document.getElementById('needle');
+
+function setVinyl(sonando) {
+    vinylLabel.classList.toggle('paused', !sonando);
+    needle.classList.toggle('playing', sonando);
+}
+
+// Spotify llama a esta función cuando su API está lista
+window.onSpotifyIframeApiReady = (IFrameAPI) => {
+    const element = document.getElementById('embed-iframe');
+    const options = {
+        uri: 'spotify:playlist:7HexChaX5R3JYJ66rlKut9',
+        width: '100%',
+        height: 380
+    };
+    IFrameAPI.createController(element, options, (controller) => {
+        spotifyController = controller;
+        // El disco sigue al reproductor: si pausan desde Spotify, se detiene
+        controller.addListener('playback_update', (e) => {
+            setVinyl(!e.data.isPaused);
+        });
+    });
+};
+
 document.getElementById('vinyl-card').addEventListener('click', () => {
-    const label = document.getElementById('vinyl-label');
-    const needle = document.getElementById('needle');
-    label.classList.toggle('paused');
-    needle.classList.toggle('playing');
+    if (spotifyController) spotifyController.togglePlay();
 });
 
 // ====== CORAZONES EN CANVAS ======
